@@ -1,0 +1,50 @@
+{
+  "version": "synthetic-ocr-replay-1",
+  "fixtures": [
+    {
+      "sha256": "aeb57ff2c474eed960b9f5fa786dd22b5a403f729a9baa65100dbbd1fd165b87",
+      "text": "合成回放样例：格华止 二甲双胍片 0.5g",
+      "confidence": 1.0,
+      "confidenceMeaning": "synthetic fixture certainty, not OCR accuracy",
+      "boxes": [
+        {
+          "text": "合成回放样例：格华止 二甲双胍片 0.5g",
+          "x": 20,
+          "y": 45,
+          "width": 720,
+          "height": 45
+        }
+      ]
+    },
+    {
+      "sha256": "4ed5833090b4e13f6f1fabcc50a17956fe1d78401d833dce564df23b7e30b853",
+      "text": "合成回放样例：代文 缬沙坦胶囊 80mg",
+      "confidence": 1.0,
+      "confidenceMeaning": "synthetic fixture certainty, not OCR accuracy",
+      "boxes": [
+        {
+          "text": "合成回放样例：代文 缬沙坦胶囊 80mg",
+          "x": 20,
+          "y": 45,
+          "width": 720,
+          "height": 45
+        }
+      ]
+    },
+    {
+      "sha256": "c64a7ad9a517e64c4bb49a9ca6a1b3def1dcfcf5a07b810fde5581d768cbcd3c",
+      "text": "合成回放样例：未知药品 XYZ 7mg",
+      "confidence": 1.0,
+      "confidenceMeaning": "synthetic fixture certainty, not OCR accuracy",
+      "boxes": [
+        {
+          "text": "合成回放样例：未知药品 XYZ 7mg",
+          "x": 20,
+          "y": 45,
+          "width": 720,
+          "height": 45
+        }
+      ]
+    }
+  ]
+}

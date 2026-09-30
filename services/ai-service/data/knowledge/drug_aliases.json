@@ -1,0 +1,50 @@
+{
+  "二甲双胍": {
+    "normalizedName": "METFORMIN",
+    "genericName": "二甲双胍",
+    "classes": ["GLUCOSE_LOWERING", "BIGUANIDE"],
+    "source": "nmpa_snapshot"
+  },
+  "METFORMIN": {
+    "normalizedName": "METFORMIN",
+    "genericName": "二甲双胍",
+    "classes": ["GLUCOSE_LOWERING", "BIGUANIDE"],
+    "source": "rxnorm_snapshot"
+  },
+  "格华止": {
+    "normalizedName": "METFORMIN",
+    "genericName": "二甲双胍",
+    "classes": ["GLUCOSE_LOWERING", "BIGUANIDE"],
+    "source": "nmpa_snapshot"
+  },
+  "缬沙坦": {
+    "normalizedName": "VALSARTAN",
+    "genericName": "缬沙坦",
+    "classes": ["BP_LOWERING", "ARB"],
+    "source": "nmpa_snapshot"
+  },
+  "VALSARTAN": {
+    "normalizedName": "VALSARTAN",
+    "genericName": "缬沙坦",
+    "classes": ["BP_LOWERING", "ARB"],
+    "source": "rxnorm_snapshot"
+  },
+  "代文": {
+    "normalizedName": "VALSARTAN",
+    "genericName": "缬沙坦",
+    "classes": ["BP_LOWERING", "ARB"],
+    "source": "nmpa_snapshot"
+  },
+  "格列美脲": {
+    "normalizedName": "GLIMEPIRIDE",
+    "genericName": "格列美脲",
+    "classes": ["GLUCOSE_LOWERING", "SULFONYLUREA"],
+    "source": "nmpa_snapshot"
+  },
+  "GLIMEPIRIDE": {
+    "normalizedName": "GLIMEPIRIDE",
+    "genericName": "格列美脲",
+    "classes": ["GLUCOSE_LOWERING", "SULFONYLUREA"],
+    "source": "rxnorm_snapshot"
+  }
+}

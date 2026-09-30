@@ -1,0 +1,34 @@
+{
+  "name": "@yaoheng/mobile-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "cap:sync": "npx cap sync",
+    "cap:copy": "npx cap copy",
+    "cap:open:android": "npx cap open android",
+    "build:android": "npm run build && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor-community/speech-recognition": "^7.0.1",
+    "@capacitor-community/text-to-speech": "^8.0.0",
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/app": "^8.0.1",
+    "@capacitor/core": "^8.3.0",
+    "@capacitor/local-notifications": "^8.0.2",
+    "echarts": "^6.0.0",
+    "pinia": "^3.0.3",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.3.0",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.3",
+    "vue-tsc": "^3.1.1"
+  }
+}

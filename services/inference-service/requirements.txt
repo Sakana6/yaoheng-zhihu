@@ -1,0 +1,7 @@
+# CPU SenseVoice ONNX. No changes to the existing AI service environment.
+sherpa-onnx==1.13.8
+numpy==2.4.4
+av==17.0.0
+fastapi==0.135.2
+uvicorn==0.42.0
+pytest==9.0.2

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yaoheng.example/schemas/joint-event.schema.json",
+  "title": "JointEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["eventType", "severity", "evidence", "riskDirections"],
+  "properties": {
+    "eventType": {
+      "type": "string",
+      "enum": ["JE001", "JE002", "JE003", "JE004", "JE005", "JE006", "JE007", "JE008", "JE009", "JE010"]
+    },
+    "severity": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "evidence": {
+      "type": "object"
+    },
+    "riskDirections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": ["DEINTENSIFICATION", "INTERACTION", "TEMPORAL_BEHAVIOR", "JOINT_EVENT"]
+      }
+    },
+    "eventLabel": {
+      "type": "string"
+    },
+    "eventDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "timeWindowStart": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "timeWindowEnd": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

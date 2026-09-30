@@ -1,0 +1,19 @@
+/* Scoped by the two owning views; no global form overrides. */
+:is(.real-feedback-sheet, .real-revision-form) { min-width: 0; color: #284b59; font-size: 14px; line-height: 1.65; }
+:is(.real-feedback-sheet, .real-revision-form) form { min-width: 0; margin-top: 16px; }
+:is(.real-feedback-sheet, .real-revision-form) fieldset { margin: 0; }
+:is(.real-feedback-sheet, .real-revision-form) legend { padding: 0 0 8px; font-size: 17px; font-weight: 700; color: #284b59; }
+:is(.real-feedback-sheet, .real-revision-form) h3 { margin: 22px 0 10px; padding-bottom: 8px; border-bottom: 1px solid #dae6e3; font-size: 15px; }
+:is(.real-feedback-sheet, .real-revision-form) p { margin: 8px 0; font-size: 13px; color: #617986; line-height: 1.75; overflow-wrap: anywhere; }
+:is(.real-feedback-sheet, .real-revision-form) label { min-width: 0; font-size: 13px; font-weight: 600; }
+:is(.real-feedback-sheet, .real-revision-form) :is(input, select, textarea) { min-width: 0; color: #284b59; background: #fff; font-weight: 400; min-height: 42px; }
+:is(.real-feedback-sheet, .real-revision-form) textarea { resize: vertical; }
+:is(.real-feedback-sheet, .real-revision-form) :is(input, select, textarea, button):focus-visible { outline: 2px solid #36877d; outline-offset: 2px; }
+:is(.real-feedback-sheet, .real-revision-form) .fact-row { border: 1px solid #e0e9e6; }
+:is(.real-feedback-sheet, .real-revision-form) .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+:is(.real-feedback-sheet, .real-revision-form) button { font: inherit; font-size: 13px; line-height: 1.5; cursor: pointer; max-width: 100%; }
+:is(.real-feedback-sheet, .real-revision-form) button:disabled { opacity: .55; cursor: wait; }
+:is(.real-feedback-sheet, .real-revision-form) .feedback-confirmation { display: grid; grid-template-columns: 18px minmax(0,1fr); align-items: start; gap: 10px; padding: 12px; border-radius: 12px; background: #edf5f2; font-weight: 400; }
+:is(.real-feedback-sheet, .real-revision-form) .feedback-confirmation input { width: 18px; height: 18px; min-height: 0; margin: 3px 0 0; accent-color: #36877d; }
+:is(.real-feedback-sheet, .real-revision-form) [role=alert]:empty { display: none; }
+:is(.real-feedback-sheet, .real-revision-form) [role=alert]:not(:empty) { padding: 10px 12px; border-radius: 10px; background: #fff1ed; color: #aa4343; }

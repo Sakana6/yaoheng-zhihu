@@ -1,0 +1,96 @@
+openapi: 3.0.3
+info:
+  title: Local R1 orchestration (legacy four endpoints unchanged)
+  version: rules_r1_1
+paths:
+  /ai/r1/analyze:
+    post:
+      description: Frozen manifest to replayable local rules; never calls external models.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/Manifest'}
+      responses:
+        '200':
+          description: Versioned analysis before Java assigns runId/snapshotId
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Analysis'}
+  /ai/r1/report:
+    post:
+      description: Render a frozen EvidencePacket using audited HTML template html_r1_1.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [snapshot, reportType]
+              properties:
+                snapshot: {type: object}
+                reportType: {type: string, enum: [FAMILY, DOCTOR]}
+      responses:
+        '200':
+          description: HTML plus packetJson for independent source and template audit
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [html, packetJson, templateVersion, snapshotId, reportType, evidenceHash]
+                properties:
+                  html: {type: string}
+                  packetJson: {type: string}
+                  templateVersion: {type: string, enum: [html_r1_1]}
+                  snapshotId: {type: string}
+                  reportType: {type: string, enum: [FAMILY, DOCTOR]}
+                  evidenceHash: {type: string}
+components:
+  schemas:
+    Manifest:
+      type: object
+      required: [patientId, inputRevision, referenceTime, medications, records, reminders]
+      properties:
+        patientId: {type: integer}
+        inputRevision: {type: integer}
+        referenceTime: {type: string, format: date-time}
+        medications: {type: array, items: {type: object}}
+        records:
+          type: array
+          items:
+            type: object
+            required: [recordId, revisionId, rawText, occurredAt, confirmedFacts]
+            properties:
+              recordId: {type: string}
+              revisionId: {type: string}
+              rawText: {type: string}
+              occurredAt: {type: string, format: date-time}
+              confirmedFacts: {type: object}
+        reminders: {type: array, items: {type: object}}
+    Analysis:
+      type: object
+      required: [algorithmVersion, inputRevision, referenceTime, risk, dataStatus, jointEvents, evaluations, evidence, missingFields, timeline, profile, medications, candidates]
+      properties:
+        algorithmVersion: {type: string, enum: [rules_r1_1]}
+        inputRevision: {type: integer}
+        referenceTime: {type: string, format: date-time}
+        risk: {type: object, nullable: true}
+        dataStatus: {type: string, enum: [SUFFICIENT, PARTIAL, INSUFFICIENT]}
+        jointEvents: {type: array, items: {type: object}}
+        evaluations: {type: array, items: {type: object}}
+        evidence: {type: array, items: {type: object}}
+        missingFields: {type: array, items: {type: string}}
+        timeline: {type: array, items: {type: object}}
+        profile:
+          type: object
+          required: [lowBgCount14d, lowBpCount14d, missedMedCount14d, responseRate]
+          properties:
+            lowBgCount14d: {type: integer, minimum: 0}
+            lowBpCount14d: {type: integer, minimum: 0}
+            missedMedCount14d: {type: integer, minimum: 0}
+            responseRate: {type: number, nullable: true, minimum: 0, maximum: 1}
+        medications:
+          type: array
+          description: Same order and original fields as the frozen manifest; only classes may be added.
+          items: {type: object}
+        candidates: {type: array, items: {type: object}}

@@ -1,0 +1,85 @@
+{
+  "caseId": "mvp-je001-case",
+  "patient": {
+    "id": 1,
+    "name": "张桂英",
+    "gender": "FEMALE",
+    "birthday": "1948-06-12",
+    "livingStatus": "WITH_FAMILY",
+    "digitalAbilityLevel": "LOW",
+    "diseaseTags": ["HYPERTENSION", "TYPE2_DIABETES"]
+  },
+  "medications": [
+    {
+      "medicationMasterId": 101,
+      "genericName": "二甲双胍",
+      "dose": "0.5g",
+      "frequency": "BID",
+      "administrationTime": "AFTER_BREAKFAST_AFTER_DINNER"
+    },
+    {
+      "medicationMasterId": 201,
+      "genericName": "缬沙坦",
+      "dose": "80mg",
+      "frequency": "QD",
+      "administrationTime": "AFTER_BREAKFAST"
+    }
+  ],
+  "timeline": [
+    {
+      "type": "MEAL",
+      "time": "2026-03-31T08:00:00+08:00",
+      "payload": {
+        "mealType": "BREAKFAST",
+        "intakeLevel": "INSUFFICIENT"
+      }
+    },
+    {
+      "type": "ADHERENCE",
+      "time": "2026-03-31T08:10:00+08:00",
+      "payload": {
+        "eventType": "TAKEN",
+        "medicationId": 1001
+      }
+    },
+    {
+      "type": "SYMPTOM",
+      "time": "2026-03-31T09:00:00+08:00",
+      "payload": {
+        "symptomCodes": ["DIZZINESS", "SWEATING", "TREMOR"],
+        "severity": 3
+      }
+    },
+    {
+      "type": "BG",
+      "time": "2026-03-31T09:05:00+08:00",
+      "payload": {
+        "glucoseValue": 3.8,
+        "mealPhase": "POST_BREAKFAST"
+      }
+    }
+  ],
+  "expectedOutputs": {
+    "jointEvent": {
+      "eventType": "JE001",
+      "severity": 82,
+      "riskDirections": ["DEINTENSIFICATION", "JOINT_EVENT"]
+    },
+    "risk": {
+      "deintensificationScore": 82,
+      "interactionScore": 20,
+      "behaviorScore": 61,
+      "jointEventScore": 88,
+      "reviewPriority": "CLINIC_REVIEW"
+    },
+    "doctorSummary": {
+      "title": "复查摘要",
+      "mustMention": [
+        "早餐摄入不足后服用降糖药",
+        "出现头晕/出汗/手抖",
+        "血糖低值",
+        "建议近期门诊复核降糖强度"
+      ]
+    }
+  }
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "drugA": "METFORMIN",
+    "drugB": "GLIMEPIRIDE",
+    "hint": "降糖方案联用时需关注低血糖倾向"
+  },
+  {
+    "drugA": "VALSARTAN",
+    "drugB": "VALSARTAN",
+    "hint": "检测到重复降压药背景，请复核药历"
+  }
+]

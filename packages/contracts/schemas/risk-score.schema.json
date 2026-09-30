@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yaoheng.example/schemas/risk-score.schema.json",
+  "title": "RiskScore",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "deintensificationScore",
+    "interactionScore",
+    "behaviorScore",
+    "jointEventScore",
+    "reviewPriority",
+    "reasons"
+  ],
+  "properties": {
+    "deintensificationScore": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "interactionScore": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "behaviorScore": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "jointEventScore": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "reviewPriority": {
+      "type": "string",
+      "enum": ["OBSERVE", "RETEST_SOON", "CLINIC_REVIEW", "HIGH_PRIORITY"]
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "modelVersion": {
+      "type": "string"
+    }
+  }
+}

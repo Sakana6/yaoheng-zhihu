@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import path from 'node:path';
+import {createServer} from 'vite';
+const root=path.resolve('apps/mobile-app');
+const server=await createServer({root,configFile:path.join(root,'vite.config.ts'),optimizeDeps:{noDiscovery:true,include:[]},server:{middlewareMode:true,watch:null,hmr:false}});
+const nav=Object.getOwnPropertyDescriptor(globalThis,'navigator'),originalMedia=globalThis.MediaRecorder;
+try {
+  const shared=name=>server.ssrLoadModule('/@fs/'+path.resolve('packages/frontend',name).replaceAll('\\','/'));
+  const {createAudioRecorder}=await shared('audio-recorder.ts'),{createDeviceReplay}=await shared('device-replay.ts');
+  let acquired,stops=0;const stream={getTracks:()=>[{stop:()=>stops++}]};
+  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{mediaDevices:{getUserMedia:async()=>{throw Error('permission denied');}}}});
+  let recorder;
+  globalThis.MediaRecorder=class{constructor(){recorder=this;this.state='inactive';this.mimeType='audio/webm';}start(){this.state='recording';}stop(){this.state='inactive';this.onstop?.();}};
+  const audio=[],errors=[],states=[];const mic=createAudioRecorder(x=>audio.push(x),e=>errors.push(e),s=>states.push(s));
+  await mic.start();assert.match(errors[0],/权限/);assert.equal(audio.length,0);
+  navigator.mediaDevices.getUserMedia=()=>new Promise(r=>acquired=r);
+  const delayed=mic.start();mic.cancel();acquired(stream);await delayed;assert.equal(stops,1);assert.equal(audio.length,0);
+  navigator.mediaDevices.getUserMedia=async()=>stream;
+  await mic.start();recorder.ondataavailable({data:new Blob(['valid recording'])});mic.stop();assert.equal(audio.length,1);assert.equal(stops,2);
+  await mic.start();recorder.ondataavailable({data:new Blob([new Uint8Array(2*1024*1024+1)])});assert.equal(audio.length,1);assert.equal(stops,3);assert.match(errors.at(-1),/2 MiB/);
+  const staleRecorder=recorder,oldErrors=errors.length;
+  await mic.start();staleRecorder.onerror();assert.equal(recorder.state,'recording');assert.equal(errors.length,oldErrors,'old recorder errors must not cancel a new recording');
+  mic.cancel();
+  let release;const seen=[],sent=[];
+  const replay=createDeviceReplay(async event=>{sent.push(event);if(sent.length===1)return new Promise(r=>release=r);if(event.id===3)throw Error('bad unit');return event;},(index,result)=>seen.push({index,result}));
+  replay.load([{id:1},{id:2},{id:3}]);const first=replay.resume();replay.pause();release({id:1});await first;
+  assert.equal(sent.length,1);assert.equal(replay.cursor,1);await replay.resume();assert.equal(sent.length,3);assert.equal(seen.length,3);assert.match(seen[2].result.message,/bad unit/);
+  await replay.resume();assert.equal(sent.length,3);
+  assert.throws(()=>replay.load(Array(101).fill({})),/100/);
+  console.log('PASS microphone denial, permission-race cleanup, stop/cancel/size bound and sequential replay pause/resume/error handling');
+} finally {if(nav)Object.defineProperty(globalThis,'navigator',nav);else delete globalThis.navigator;globalThis.MediaRecorder=originalMedia;await server.close();}

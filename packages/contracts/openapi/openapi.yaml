@@ -1,0 +1,4073 @@
+openapi: 3.0.3
+x-capture-contract: ./capture.openapi.yaml
+info:
+  title: 药衡智护 OpenAPI v1
+  version: 1.0.0
+  description: '基于冻结清单 v1 整理的业务后端契约。 路径中的 `{patientId}`、`{medId}`、`{sessionId}`、`{reportId}` 是 OpenAPI 标准写法， 对应冻结文档中的 `:id`
+    风格路径。
+
+    '
+servers:
+- url: /api
+tags:
+- name: Auth
+- name: Patient
+- name: Medication
+- name: Record
+- name: Inquiry
+- name: Risk
+- name: Report
+- name: Reminder
+paths:
+  /auth/login:
+    post:
+      tags:
+      - Auth
+      summary: 登录
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/LoginData'
+      x-implementation-status: planned
+  /auth/password-login:
+    post:
+      summary: password-login
+      x-implementation-status: available
+      security: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/LoginData'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordLoginRequest'
+  /auth/logout:
+    post:
+      summary: logout
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      required:
+                      - success
+                      properties:
+                        success:
+                          type: boolean
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /capabilities:
+    get:
+      summary: capabilities
+      x-implementation-status: available
+      security: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Capabilities'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /patients/current:
+    get:
+      tags:
+      - Patient
+      summary: 获取当前上下文患者
+      responses:
+        '200':
+          description: 当前患者上下文
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/CurrentPatientContext'
+      x-implementation-status: available
+  /patients:
+    post:
+      tags:
+      - Patient
+      summary: 创建患者档案
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientCreateRequest'
+      responses:
+        '200':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/PatientProfile'
+      x-implementation-status: planned
+    get:
+      summary: patients
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/PatientList'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /patients/{patientId}/profile:
+    get:
+      tags:
+      - Patient
+      summary: 获取患者资料
+      parameters:
+      - $ref: '#/components/parameters/PatientId'
+      responses:
+        '200':
+          description: 患者资料
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/PatientProfile'
+      x-implementation-status: available
+    patch:
+      tags:
+      - Patient
+      summary: 更新患者资料
+      parameters:
+      - $ref: '#/components/parameters/PatientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientPatchRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/PatientProfile'
+      x-implementation-status: planned
+  /patients/{patientId}/medication-uploads:
+    post:
+      tags:
+      - Medication
+      summary: 提交药盒 / 处方上传任务
+      parameters:
+      - $ref: '#/components/parameters/PatientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationUploadCreateRequest'
+      responses:
+        '202':
+          description: 已受理
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/AsyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AcceptedTask'
+      x-implementation-status: planned
+  /patients/{patientId}/medication-uploads/{taskId}:
+    get:
+      tags:
+      - Medication
+      summary: 查询药盒识别任务结果
+      parameters:
+      - $ref: '#/components/parameters/PatientId'
+      - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          description: 任务状态
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/MedicationUploadTask'
+      x-implementation-status: planned
+  /patients/{patientId}/medications/confirm:
+    post:
+      tags:
+      - Medication
+      summary: 确认药历
+      parameters:
+      - $ref: '#/components/parameters/PatientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationConfirmRequest'
+      responses:
+        '200':
+          description: 确认后的药历列表
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        medications:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/PatientMedication'
+      x-implementation-status: planned
+  /patients/{patientId}/medications:
+    post:
+      summary: medications
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/PatientMedication'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: patientId
+        in: path
+        required: true
+        schema: &id001
+          type: integer
+          minimum: 1
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManualMedicationCreateRequest'
+    get:
+      tags:
+      - Medication
+      summary: 获取当前药历
+      parameters:
+      - $ref: '#/components/parameters/PatientId'
+      responses:
+        '200':
+          description: 当前药历
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        medications:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/PatientMedication'
+      x-implementation-status: available
+  /patients/{patientId}/medications/{medId}:
+    patch:
+      summary: '{medId}'
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/PatientMedication'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+      - name: medId
+        in: path
+        required: true
+        schema: &id002
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationPatchRequest'
+  /patients/{patientId}/medications/check-conflicts:
+    post:
+      tags:
+      - Medication
+      summary: 检查药物冲突与联用风险
+      parameters:
+      - $ref: '#/components/parameters/PatientId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationConflictCheckRequest'
+      responses:
+        '200':
+          description: 冲突检查结果
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/MedicationConflictResult'
+      x-implementation-status: planned
+  /patients/{patientId}/bp-records:
+    post:
+      tags:
+      - Record
+      summary: 新增血压记录
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      - $ref: '#/components/parameters/PatientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BpRecordCreateRequest'
+      responses:
+        '200':
+          description: 新增成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasicSuccessEnvelope'
+      x-implementation-status: available
+  /patients/{patientId}/bg-records:
+    post:
+      tags:
+      - Record
+      summary: 新增血糖记录
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      - $ref: '#/components/parameters/PatientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BgRecordCreateRequest'
+      responses:
+        '200':
+          description: 新增成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasicSuccessEnvelope'
+      x-implementation-status: available
+  /patients/{patientId}/symptom-records:
+    post:
+      tags:
+      - Record
+      summary: 新增症状记录
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      - $ref: '#/components/parameters/PatientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SymptomRecordCreateRequest'
+      responses:
+        '200':
+          description: 新增成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasicSuccessEnvelope'
+      x-implementation-status: available
+  /patients/{patientId}/adherence-events:
+    post:
+      tags:
+      - Record
+      summary: 新增依从性事件
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      - $ref: '#/components/parameters/PatientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdherenceEventCreateRequest'
+      responses:
+        '200':
+          description: 新增成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasicSuccessEnvelope'
+      x-implementation-status: available
+  /patients/{patientId}/meal-records:
+    post:
+      tags:
+      - Record
+      summary: 新增餐次记录
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      - $ref: '#/components/parameters/PatientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MealRecordCreateRequest'
+      responses:
+        '200':
+          description: 新增成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasicSuccessEnvelope'
+      x-implementation-status: available
+  /patients/{patientId}/inquiry-sessions/start:
+    post:
+      tags:
+      - Inquiry
+      summary: 启动追问会话
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      - $ref: '#/components/parameters/PatientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InquirySessionStartRequest'
+      responses:
+        '200':
+          description: 会话已创建
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/InquirySession'
+      x-implementation-status: available
+  /patients/{patientId}/inquiry-sessions/{sessionId}/answer:
+    post:
+      tags:
+      - Inquiry
+      summary: 提交追问答案
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      - $ref: '#/components/parameters/PatientId'
+      - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InquiryAnswerRequest'
+      responses:
+        '200':
+          description: 提交成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/FeedbackRecord'
+      x-implementation-status: available
+  /patients/{patientId}/inquiry-sessions/{sessionId}/next-question:
+    get:
+      tags:
+      - Inquiry
+      summary: 获取下一问
+      parameters:
+      - $ref: '#/components/parameters/PatientId'
+      - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: 下一问
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/InquiryNextQuestion'
+      x-implementation-status: available
+  /patients/{patientId}/risk/latest:
+    get:
+      tags:
+      - Risk
+      summary: 获取最新风险结果
+      parameters:
+      - $ref: '#/components/parameters/PatientId'
+      responses:
+        '200':
+          description: 最新风险结果
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/LatestAnalysis'
+      x-implementation-status: available
+  /patients/{patientId}/joint-events:
+    get:
+      tags:
+      - Risk
+      summary: 获取联合事件列表
+      parameters:
+      - $ref: '#/components/parameters/PatientId'
+      responses:
+        '200':
+          description: 联合事件列表
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        jointEvents:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/JointEvent'
+      x-implementation-status: available
+  /patients/{patientId}/reports/generate:
+    post:
+      tags:
+      - Report
+      summary: 发起报告生成
+      security: [{bearerAuth: []}]
+      parameters:
+      - {name: Idempotency-Key, in: header, required: true, schema: {type: string}}
+      - $ref: '#/components/parameters/PatientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportGenerateRequest'
+      responses:
+        '202':
+          description: 已受理
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/AsyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ReportTask'
+      x-implementation-status: available
+  /patients/{patientId}/reports/{reportId}:
+    get:
+      tags:
+      - Report
+      summary: 获取报告状态
+      parameters:
+      - $ref: '#/components/parameters/PatientId'
+      - $ref: '#/components/parameters/ReportId'
+      responses:
+        '200':
+          description: 报告状态
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ReportTask'
+      x-implementation-status: available
+  /patients/{patientId}/reports/{reportId}/download:
+    get:
+      summary: Download persisted HTML; no token in URL
+      x-implementation-status: available
+      security: [{bearerAuth: []}]
+      parameters:
+      - {$ref: '#/components/parameters/PatientId'}
+      - {name: reportId, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Audited HTML report with checksum
+          content:
+            text/html:
+              schema: {type: string}
+        '409': {description: Report not successful}
+        '403': {description: Patient not authorized}
+
+  /patients/{patientId}/reminders/today:
+    get:
+      tags:
+      - Reminder
+      summary: 获取今日提醒
+      parameters:
+      - name: limit
+        in: query
+        schema: {type: integer, minimum: 1, maximum: 100, default: 20}
+      - name: cursor
+        in: query
+        schema: {type: string}
+      - name: date
+        in: query
+        schema: {type: string, format: date}
+      - name: timezone
+        in: query
+        schema: {type: string, enum: [Asia/Shanghai]}
+      - $ref: '#/components/parameters/PatientId'
+      responses:
+        '200':
+          description: 今日提醒
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        items:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/ReminderItem'
+      x-implementation-status: available
+  /patients/{patientId}/reminders/ack:
+    post:
+      tags:
+      - Reminder
+      summary: 确认提醒已处理
+      parameters:
+      - $ref: '#/components/parameters/PatientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReminderAckRequest'
+      responses:
+        '200':
+          description: 确认成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasicSuccessEnvelope'
+      x-implementation-status: available
+  /patients/{patientId}/reminder-settings:
+    patch:
+      tags:
+      - Reminder
+      summary: 更新提醒设置
+      parameters:
+      - $ref: '#/components/parameters/PatientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReminderSettingsPatchRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasicSuccessEnvelope'
+      x-implementation-status: planned
+  /patients/{patientId}/reminder-plans:
+    post:
+      summary: reminder-plans
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ReminderPlanSaveResult'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReminderPlanRequest'
+    get:
+      summary: reminder-plans
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      required:
+                      - items
+                      - nextCursor
+                      properties:
+                        items:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/ReminderPlan'
+                        nextCursor:
+                          type: string
+                          nullable: true
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: limit
+        in: query
+        schema: {type: integer, minimum: 1, maximum: 100, default: 20}
+      - name: cursor
+        in: query
+        schema: {type: string}
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+  /patients/{patientId}/reminder-plans/{planId}:
+    patch:
+      summary: '{planId}'
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ReminderPlanSaveResult'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+      - name: planId
+        in: path
+        required: true
+        schema: *id002
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReminderPlanPatch'
+  /patients/{patientId}/reminders:
+    get:
+      summary: reminders
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      required:
+                      - items
+                      - nextCursor
+                      properties:
+                        items:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/ReminderItem'
+                        nextCursor:
+                          type: string
+                          nullable: true
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: limit
+        in: query
+        schema: {type: integer, minimum: 1, maximum: 100, default: 20}
+      - name: cursor
+        in: query
+        schema: {type: string}
+      - name: date
+        in: query
+        schema: {type: string, format: date}
+      - name: timezone
+        in: query
+        schema: {type: string, enum: [Asia/Shanghai]}
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+  /patients/{patientId}/reminders/upcoming:
+    get:
+      summary: Upcoming seven-day occurrences for notification reconciliation
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      required:
+                      - items
+                      - nextCursor
+                      properties:
+                        items:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/ReminderItem'
+                        nextCursor:
+                          type: string
+                          nullable: true
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: limit
+        in: query
+        schema: {type: integer, minimum: 1, maximum: 100, default: 20}
+      - name: cursor
+        in: query
+        schema: {type: string}
+      - name: date
+        in: query
+        schema: {type: string, format: date}
+      - name: timezone
+        in: query
+        schema: {type: string, enum: [Asia/Shanghai]}
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+  /patients/{patientId}/reminders/{occurrenceId}/skip:
+    post:
+      summary: skip
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ReminderItem'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+      - name: occurrenceId
+        in: path
+        required: true
+        schema: *id002
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkipRequest'
+  /patients/{patientId}/feedback-records:
+    post:
+      summary: feedback-records
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/FeedbackRecord'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackRequest'
+  /patients/{patientId}/feedback-records/{recordId}:
+    get:
+      summary: '{recordId}'
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/FeedbackRecord'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+      - name: recordId
+        in: path
+        required: true
+        schema: *id002
+  /patients/{patientId}/feedback-records/{recordId}/revisions:
+    post:
+      summary: revisions
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/FeedbackRecord'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+      - name: recordId
+        in: path
+        required: true
+        schema: *id002
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackRevisionRequest'
+  /patients/{patientId}/daily-events:
+    get:
+      summary: daily-events
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      required:
+                      - items
+                      - nextCursor
+                      properties:
+                        items:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/FeedbackRecord'
+                        nextCursor:
+                          type: string
+                          nullable: true
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: limit
+        in: query
+        schema: {type: integer, minimum: 1, maximum: 100, default: 20}
+      - name: cursor
+        in: query
+        schema: {type: string}
+      - name: date
+        in: query
+        schema: {type: string, format: date}
+      - name: timezone
+        in: query
+        schema: {type: string, enum: [Asia/Shanghai]}
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+  /patients/{patientId}/analysis-tasks/{taskId}:
+    get:
+      summary: '{taskId}'
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AnalysisTask'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+      - name: taskId
+        in: path
+        required: true
+        schema: *id002
+  /patients/{patientId}/analysis-tasks/{taskId}/retry:
+    post:
+      summary: retry
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AnalysisTask'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+      - name: taskId
+        in: path
+        required: true
+        schema: *id002
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+  /patients/{patientId}/analysis/latest:
+    get:
+      summary: latest
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/LatestAnalysis'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+  /patients/{patientId}/analyses/{runId}:
+    get:
+      summary: '{runId}'
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AnalysisSnapshot'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+      - name: runId
+        in: path
+        required: true
+        schema: *id002
+  /patients/{patientId}/reviews:
+    get:
+      summary: GET Review
+      x-implementation-status: implemented
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        items:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/Review'
+                        nextCursor:
+                          type: string
+                          nullable: true
+                      required:
+                      - items
+                      - nextCursor
+        '400':
+          description: Invalid request
+        '403':
+          description: Role or patient access denied
+        '404':
+          description: Patient resource not found
+        '409':
+          description: Version, snapshot or lifecycle conflict
+        '422':
+          description: Validation failed
+        '503':
+          description: Transaction or service unavailable
+    post:
+      summary: POST Review
+      x-implementation-status: implemented
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Review'
+        '400':
+          description: Invalid request
+        '403':
+          description: Role or patient access denied
+        '404':
+          description: Patient resource not found
+        '409':
+          description: Version, snapshot or lifecycle conflict
+        '422':
+          description: Validation failed
+        '503':
+          description: Transaction or service unavailable
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+    parameters:
+    - in: path
+      name: patientId
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+  /patients/{patientId}/follow-ups:
+    get:
+      summary: GET FollowUp
+      x-implementation-status: implemented
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        items:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/FollowUp'
+                        nextCursor:
+                          type: string
+                          nullable: true
+                      required:
+                      - items
+                      - nextCursor
+        '400':
+          description: Invalid request
+        '403':
+          description: Role or patient access denied
+        '404':
+          description: Patient resource not found
+        '409':
+          description: Version, snapshot or lifecycle conflict
+        '422':
+          description: Validation failed
+        '503':
+          description: Transaction or service unavailable
+    post:
+      summary: POST FollowUp
+      x-implementation-status: implemented
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/FollowUp'
+        '400':
+          description: Invalid request
+        '403':
+          description: Role or patient access denied
+        '404':
+          description: Patient resource not found
+        '409':
+          description: Version, snapshot or lifecycle conflict
+        '422':
+          description: Validation failed
+        '503':
+          description: Transaction or service unavailable
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FollowUpRequest'
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+    parameters:
+    - in: path
+      name: patientId
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+  /patients/{patientId}/follow-ups/{followUpId}:
+    get:
+      summary: GET FollowUp
+      x-implementation-status: implemented
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/FollowUp'
+        '400':
+          description: Invalid request
+        '403':
+          description: Role or patient access denied
+        '404':
+          description: Patient resource not found
+        '409':
+          description: Version, snapshot or lifecycle conflict
+        '422':
+          description: Validation failed
+        '503':
+          description: Transaction or service unavailable
+    patch:
+      summary: PATCH FollowUp
+      x-implementation-status: implemented
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/SyncEnvelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/FollowUp'
+        '400':
+          description: Invalid request
+        '403':
+          description: Role or patient access denied
+        '404':
+          description: Patient resource not found
+        '409':
+          description: Version, snapshot or lifecycle conflict
+        '422':
+          description: Validation failed
+        '503':
+          description: Transaction or service unavailable
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FollowUpPatch'
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+    parameters:
+    - in: path
+      name: patientId
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    - in: path
+      name: followUpId
+      required: true
+      schema:
+        type: string
+  /patients/{patientId}/reports/{reportId}/content:
+    get:
+      summary: content
+      x-implementation-status: available
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            text/html:
+              schema:
+                type: string
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      parameters:
+      - name: patientId
+        in: path
+        required: true
+        schema: *id001
+      - name: reportId
+        in: path
+        required: true
+        schema: *id002
+  /patients/{patientId}/analysis/runs:
+    get:
+      summary: Read persisted analysis/runs
+      x-implementation-status: available
+      security: [{bearerAuth: []}]
+      parameters:
+      - {$ref: '#/components/parameters/PatientId'}
+      responses:
+        '200':
+          description: Persisted result
+          content:
+            application/json:
+              schema:
+                allOf:
+                - {$ref: '#/components/schemas/SyncEnvelope'}
+                - type: object
+                  properties:
+                    data: {type: object, properties: {items: {type: array, items: {$ref: "#/components/schemas/AnalysisSnapshot"}}, nextCursor: {type: string, nullable: true}}}
+  /patients/{patientId}/analysis/runs/{runId}:
+    get:
+      summary: Read persisted analysis/runs/{runId}
+      x-implementation-status: available
+      security: [{bearerAuth: []}]
+      parameters:
+      - {$ref: '#/components/parameters/PatientId'}
+      - {name: runId, in: path, required: true, schema: {type: string}}
+      responses:
+        '200':
+          description: Persisted result
+          content:
+            application/json:
+              schema:
+                allOf:
+                - {$ref: '#/components/schemas/SyncEnvelope'}
+                - type: object
+                  properties:
+                    data: {$ref: "#/components/schemas/AnalysisSnapshot"}
+  /patients/{patientId}/reports:
+    get:
+      summary: Read persisted reports
+      x-implementation-status: available
+      security: [{bearerAuth: []}]
+      parameters:
+      - {$ref: '#/components/parameters/PatientId'}
+      responses:
+        '200':
+          description: Persisted result
+          content:
+            application/json:
+              schema:
+                allOf:
+                - {$ref: '#/components/schemas/SyncEnvelope'}
+                - type: object
+                  properties:
+                    data: {type: object, properties: {items: {type: array, items: {$ref: "#/components/schemas/ReportTask"}}, nextCursor: {type: string, nullable: true}}}
+    post:
+      summary: Create or retry report for specified snapshot; doctor only
+      x-implementation-status: available
+      security: [{bearerAuth: []}]
+      parameters:
+      - {$ref: '#/components/parameters/PatientId'}
+      - {name: Idempotency-Key, in: header, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [snapshotId, reportType]
+              properties:
+                snapshotId: {type: string}
+                reportType: {type: string, enum: [FAMILY, DOCTOR]}
+      responses:
+        '200':
+          description: Durable report task
+          content:
+            application/json:
+              schema:
+                allOf:
+                - {$ref: '#/components/schemas/SyncEnvelope'}
+                - type: object
+                  properties:
+                    data: {$ref: '#/components/schemas/ReportTask'}
+components:
+  parameters:
+    PatientId:
+      name: patientId
+      in: path
+      required: true
+      schema:
+        type: integer
+    MedicationId:
+      name: medId
+      in: path
+      required: true
+      schema:
+        type: integer
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+    TaskId:
+      name: taskId
+      in: path
+      required: true
+      schema:
+        type: string
+    ReportId:
+      name: reportId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    SyncEnvelope:
+      type: object
+      required:
+      - code
+      - message
+      - data
+      - requestId
+      - timestamp
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: ok
+        data:
+          type: object
+        requestId:
+          type: string
+          example: req_xxx
+        timestamp:
+          type: string
+          format: date-time
+    AsyncEnvelope:
+      type: object
+      required:
+      - code
+      - message
+      - data
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: accepted
+        data:
+          type: object
+    BasicSuccessEnvelope:
+      allOf:
+      - $ref: '#/components/schemas/SyncEnvelope'
+      - type: object
+        properties:
+          data:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+    AcceptedTask:
+      type: object
+      required:
+      - taskId
+      - status
+      properties:
+        taskId:
+          type: string
+        status:
+          $ref: '#/components/schemas/AsyncStatus'
+    AsyncStatus:
+      type: string
+      enum:
+      - PENDING
+      - RUNNING
+      - SUCCESS
+      - FAILED
+    ReviewPriority:
+      type: string
+      enum:
+      - OBSERVE
+      - RETEST_SOON
+      - CLINIC_REVIEW
+      - HIGH_PRIORITY
+    RiskDirection:
+      type: string
+      enum:
+      - DEINTENSIFICATION
+      - INTERACTION
+      - TEMPORAL_BEHAVIOR
+      - JOINT_EVENT
+    LoginRequest:
+      type: object
+      required:
+      - mobile
+      - verifyCode
+      properties:
+        mobile:
+          type: string
+        verifyCode:
+          type: string
+    LoginData:
+      type: object
+      properties:
+        token:
+          type: string
+        userId:
+          type: integer
+        role:
+          type: string
+        patientId:
+          type: integer
+          nullable: true
+    CurrentPatientContext:
+      type: object
+      properties:
+        userId:
+          type: integer
+        role:
+          type: string
+        patientId:
+          type: integer
+          nullable: true
+        patientName:
+          type: string
+          nullable: true
+    PatientProfile:
+      type: object
+      required:
+      - id
+      - name
+      - gender
+      - birthday
+      - livingStatus
+      - digitalAbilityLevel
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        gender:
+          type: string
+          enum:
+          - MALE
+          - FEMALE
+          - OTHER
+        birthday:
+          type: string
+          format: date
+        livingStatus:
+          type: string
+        digitalAbilityLevel:
+          type: string
+        diseaseTags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+    PatientCreateRequest:
+      type: object
+      required:
+      - name
+      - gender
+      - birthday
+      - livingStatus
+      - digitalAbilityLevel
+      properties:
+        name:
+          type: string
+        gender:
+          type: string
+        birthday:
+          type: string
+          format: date
+        livingStatus:
+          type: string
+        digitalAbilityLevel:
+          type: string
+        diseaseTags:
+          type: array
+          items:
+            type: string
+    PatientPatchRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        livingStatus:
+          type: string
+        digitalAbilityLevel:
+          type: string
+        diseaseTags:
+          type: array
+          items:
+            type: string
+    ErrorResponse:
+      type: object
+      required:
+      - code
+      - message
+      - data
+      - requestId
+      - timestamp
+      properties:
+        code:
+          type: integer
+        message: *id002
+        data:
+          type: object
+        requestId: *id002
+        timestamp: &id011
+          type: string
+          format: date-time
+    PasswordLoginRequest:
+      type: object
+      required:
+      - mobile
+      - password
+      properties:
+        mobile:
+          type: string
+        password:
+          type: string
+    ManualMedicationCreateRequest:
+      type: object
+      required:
+      - genericName
+      - dose
+      - frequency
+      - administrationTime
+      - startDate
+      properties:
+        captureTaskId: {type: string, description: Optional IMAGE/TEXT evidence task confirmed atomically with medication creation.}
+        captureVersion: {type: integer, minimum: 1, maximum: 2147483647}
+        genericName: &id003
+          type: string
+          minLength: 1
+          maxLength: 128
+        brandName: &id004
+          type: string
+        dose: &id005
+          type: string
+          minLength: 1
+          maxLength: 64
+        frequency: &id006
+          type: string
+          minLength: 1
+          maxLength: 64
+        administrationTime: &id007
+          type: string
+          minLength: 1
+          maxLength: 128
+        startDate: &id008
+          type: string
+          format: date
+        endDate: &id009
+          type: string
+          format: date
+          nullable: true
+        status: &id010
+          type: string
+          enum:
+          - ACTIVE
+          - STOPPED
+          - ARCHIVED
+    MedicationUploadCreateRequest:
+      type: object
+      required:
+      - fileAssetId
+      properties:
+        fileAssetId:
+          type: integer
+        sourceType:
+          type: string
+          enum:
+          - DRUG_BOX
+          - PRESCRIPTION
+    MedicationUploadTask:
+      type: object
+      properties:
+        taskId:
+          type: string
+        status:
+          $ref: '#/components/schemas/AsyncStatus'
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicationCandidate'
+    MedicationCandidate:
+      type: object
+      properties:
+        genericName:
+          type: string
+        brandName:
+          type: string
+        strength:
+          type: string
+        confidence:
+          type: number
+    MedicationConfirmRequest:
+      type: object
+      required:
+      - taskId
+      - medications
+      properties:
+        taskId:
+          type: string
+        medications:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicationConfirmItem'
+    MedicationConfirmItem:
+      type: object
+      required:
+      - medicationMasterId
+      - dose
+      - frequency
+      - administrationTime
+      - startDate
+      - status
+      properties:
+        medicationMasterId:
+          type: integer
+        dose:
+          type: string
+        frequency:
+          type: string
+        administrationTime:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+          nullable: true
+        status:
+          type: string
+        confirmedByUser:
+          type: boolean
+    PatientMedication:
+      type: object
+      properties:
+        id:
+          type: integer
+        medicationMasterId:
+          type: integer
+        genericName:
+          type: string
+        brandName:
+          type: string
+          nullable: true
+        dose:
+          type: string
+        frequency:
+          type: string
+        administrationTime:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+          nullable: true
+        status:
+          type: string
+        confirmedByUser:
+          type: boolean
+        version:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        standardizationStatus:
+          type: string
+          enum:
+          - STANDARDIZED
+          - UNSTANDARDIZED
+      required:
+      - id
+      - version
+      - genericName
+      - dose
+      - frequency
+      - administrationTime
+      - startDate
+      - status
+      - standardizationStatus
+    MedicationPatchRequest:
+      type: object
+      required:
+      - expectedVersion
+      properties:
+        genericName: *id003
+        brandName: *id004
+        dose: *id005
+        frequency: *id006
+        administrationTime: *id007
+        startDate: *id008
+        endDate: *id009
+        status: *id010
+        expectedVersion:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+    MedicationConflictCheckRequest:
+      type: object
+      properties:
+        medicationIds:
+          type: array
+          items:
+            type: integer
+    MedicationConflictResult:
+      type: object
+      properties:
+        duplicatedMedicationIds:
+          type: array
+          items:
+            type: integer
+        conflicts:
+          type: array
+          items:
+            type: object
+            properties:
+              riskDirection:
+                type: string
+              message:
+                type: string
+              medicationIds:
+                type: array
+                items:
+                  type: integer
+    BpRecordCreateRequest:
+      type: object
+      required:
+      - measuredAt
+      - systolic
+      - diastolic
+      - heartRate
+      properties:
+        measuredAt:
+          type: string
+          format: date-time
+        systolic:
+          type: integer
+        diastolic:
+          type: integer
+        heartRate:
+          type: integer
+    BgRecordCreateRequest:
+      type: object
+      required:
+      - measuredAt
+      - glucoseValue
+      - mealPhase
+      properties:
+        measuredAt:
+          type: string
+          format: date-time
+        glucoseValue:
+          type: number
+        mealPhase:
+          type: string
+    SymptomRecordCreateRequest:
+      type: object
+      required:
+      - occurredAt
+      - symptomCode
+      - severity
+      properties:
+        occurredAt:
+          type: string
+          format: date-time
+        symptomCode:
+          type: string
+        severity:
+          type: integer
+        note:
+          type: string
+    AdherenceEventCreateRequest:
+      type: object
+      required:
+      - medicationId
+      - eventTime
+      - eventType
+      properties:
+        medicationId:
+          type: integer
+        eventTime:
+          type: string
+          format: date-time
+        eventType:
+          type: string
+          enum:
+          - TAKEN
+          - MISSED
+          - MAKEUP
+        note:
+          type: string
+    MealRecordCreateRequest:
+      type: object
+      required:
+      - occurredAt
+      - mealType
+      - intakeLevel
+      properties:
+        occurredAt:
+          type: string
+          format: date-time
+        mealType:
+          type: string
+          enum:
+          - BREAKFAST
+          - LUNCH
+          - DINNER
+          - SNACK
+        intakeLevel:
+          type: string
+          enum:
+          - NORMAL
+          - INSUFFICIENT
+          - MISSED
+    InquirySessionStartRequest:
+      type: object
+      required: [recordId, revisionId]
+      properties:
+        recordId: {type: string}
+        revisionId: {type: string}
+    InquirySession:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        triggerType:
+          type: string
+        triggerTime:
+          type: string
+          format: date-time
+        sessionStatus:
+          type: string
+        modelVersion:
+          type: string
+    InquiryAnswerRequest:
+      type: object
+      required: [questionCode, answerText, revision]
+      properties:
+        questionCode: {type: string}
+        answerText: {type: string, minLength: 1, maxLength: 10000}
+        revision:
+          $ref: '#/components/schemas/FeedbackRevisionRequest'
+    InquiryNextQuestion:
+      type: object
+      required: [sessionId, isFinished, question]
+      properties:
+        question:
+          type: object
+          nullable: true
+          properties:
+            questionCode: {type: string}
+            questionText: {type: string}
+        sessionId:
+          type: string
+        questionCode:
+          type: string
+        questionText:
+          type: string
+        sourceType:
+          type: string
+        orderNo:
+          type: integer
+        isFinished:
+          type: boolean
+    RiskLatest:
+      type: object
+      required:
+      - deintensificationScore
+      - interactionScore
+      - behaviorScore
+      - jointEventScore
+      - reviewPriority
+      - reasons
+      properties:
+        deintensificationScore:
+          type: integer
+        interactionScore:
+          type: integer
+        behaviorScore:
+          type: integer
+        jointEventScore:
+          type: integer
+        reviewPriority:
+          $ref: '#/components/schemas/ReviewPriority'
+        reasons:
+          type: array
+          items:
+            type: string
+        modelVersion:
+          type: string
+    JointEvent:
+      type: object
+      required:
+      - eventType
+      - severity
+      - evidence
+      - riskDirections
+      properties:
+        eventType:
+          type: string
+          enum:
+          - JE001
+          - JE002
+          - JE003
+          - JE004
+          - JE005
+          - JE006
+          - JE007
+          - JE008
+          - JE009
+          - JE010
+        eventLabel:
+          type: string
+        eventDate:
+          type: string
+          format: date
+        timeWindowStart:
+          type: string
+          format: date-time
+        timeWindowEnd:
+          type: string
+          format: date-time
+        severity:
+          type: integer
+        evidence:
+          type: object
+        riskDirections:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskDirection'
+    ReportGenerateRequest:
+      type: object
+      required:
+      - snapshotId
+      - reportType
+      properties:
+        snapshotId: {type: string}
+        reportType:
+          type: string
+          enum:
+          - FAMILY
+          - DOCTOR
+    ReportTask:
+      type: object
+      properties:
+        snapshotId: {type: string}
+        templateVersion: {type: string}
+        attempt: {type: integer}
+        checksum: {type: string, nullable: true}
+        errorCode: {type: string, nullable: true}
+        reportId:
+          type: string
+        reportType:
+          type: string
+        status:
+          $ref: '#/components/schemas/AsyncStatus'
+        generatedAt:
+          type: string
+          format: date-time
+        fileAssetId:
+          type: integer
+          nullable: true
+    ReminderItem:
+      type: object
+      required: [occurrenceId, planId, planVersion, version, executionStatus, plannedAt, medications]
+      properties:
+        occurrenceId: {type: string}
+        feedbackRecordId:
+          type: string
+          nullable: true
+          description: Latest feedback record lookup key for this occurrence, including cross-day feedback. Read via the existing patient-scoped feedback detail endpoint.
+        planId: {type: string}
+        planVersion: {type: integer}
+        version: {type: integer}
+        executionStatus: {type: string, enum: [PENDING, DONE, SKIPPED, CANCELLED]}
+        displayStatus: {type: string, enum: [PENDING, OVERDUE, DONE, SKIPPED, CANCELLED]}
+        medications:
+          type: array
+          items:
+            type: object
+            required: [medicationId, genericName, dose, version]
+            properties:
+              medicationId: {type: integer}
+              genericName: {type: string}
+              dose: {type: string}
+              version: {type: integer}
+        reminderId:
+          type: string
+        reminderType:
+          type: string
+        plannedAt:
+          type: string
+          format: date-time
+        title:
+          type: string
+        status:
+          type: string
+        medicationIds:
+          type: array
+          items:
+            type: integer
+        medicationNames:
+          type: array
+          items:
+            type: string
+        voicePrompt:
+          type: string
+        followUpPrompt:
+          type: string
+    ReminderAckRequest:
+      type: object
+      required:
+      - reminderId
+      properties:
+        reminderId:
+          type: string
+    ReminderSettingsPatchRequest:
+      type: object
+      properties:
+        medicationReminderEnabled:
+          type: boolean
+        bpReminderEnabled:
+          type: boolean
+        bgReminderEnabled:
+          type: boolean
+        quietHours:
+          type: object
+          properties:
+            start:
+              type: string
+            end:
+              type: string
+    PatientList:
+      type: object
+      required:
+      - items
+      - nextCursor
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required:
+            - id
+            - name
+            properties:
+              id: *id001
+              name: *id002
+        nextCursor:
+          type: string
+          nullable: true
+    Capabilities:
+      type: object
+      required:
+      - manualMedication
+      - reminders
+      - feedback
+      - analysis
+      - doctorRead
+      - reports
+      - followups
+      - ocr
+      - voice
+      - device
+      properties:
+        manualMedication:
+          type: boolean
+        reminders:
+          type: boolean
+        feedback:
+          type: boolean
+        analysis:
+          type: boolean
+        doctorRead:
+          type: boolean
+        reports:
+          type: boolean
+        followups:
+          type: boolean
+        ocr:
+          type: boolean
+        voice:
+          type: boolean
+        device:
+          type: boolean
+    EvidenceReference:
+      type: object
+      required:
+      - sourceId
+      - revisionId
+      - fieldPath
+      - occurredAt
+      properties:
+        sourceId: *id002
+        revisionId: *id002
+        fieldPath: *id002
+        occurredAt: *id011
+    RuleEvaluation:
+      type: object
+      required:
+      - ruleId
+      - status
+      - evidence
+      - missingFields
+      properties:
+        ruleId: *id002
+        status:
+          type: string
+          enum:
+          - MATCHED
+          - NOT_MATCHED
+          - INSUFFICIENT
+          - NOT_APPLICABLE
+        evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvidenceReference'
+        missingFields:
+          type: array
+          items: *id002
+    AnalysisTask:
+      type: object
+      required:
+      - taskId
+      - patientId
+      - inputRevision
+      - status
+      - attempt
+      - errorCode
+      properties:
+        taskId: *id002
+        patientId: *id001
+        inputRevision: *id001
+        status:
+          $ref: '#/components/schemas/AsyncStatus'
+        attempt:
+          type: integer
+          minimum: 0
+        errorCode:
+          type: string
+          nullable: true
+    AnalysisSnapshot:
+      type: object
+      required:
+      - runId
+      - snapshotId
+      - inputRevision
+      - algorithmVersion
+      - risk
+      - jointEvents
+      - evidence
+      - evaluations
+      - missingFields
+      properties:
+        dataStatus: {type: string, enum: [SUFFICIENT, PARTIAL, INSUFFICIENT]}
+        referenceTime: {type: string, format: date-time}
+        knowledgeVersion: {type: string}
+        windowPolicyVersion: {type: string}
+        timeline: {type: array, items: {type: object}}
+        profile: {type: object}
+        medications: {type: array, items: {type: object}}
+        candidates: {type: array, items: {type: object}}
+        runId: *id002
+        snapshotId: *id002
+        inputRevision: *id001
+        algorithmVersion: *id002
+        risk:
+          type: object
+          nullable: true
+          properties:
+            deintensificationScore:
+              type: number
+            interactionScore:
+              type: number
+            behaviorScore:
+              type: number
+            jointEventScore:
+              type: number
+            reviewPriority:
+              $ref: '#/components/schemas/ReviewPriority'
+          required:
+          - deintensificationScore
+          - interactionScore
+          - behaviorScore
+          - jointEventScore
+          - reviewPriority
+        jointEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalysisJointEvent'
+        evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvidenceReference'
+        evaluations:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleEvaluation'
+        missingFields:
+          type: array
+          items: *id002
+    LatestAnalysis:
+      type: object
+      required:
+      - snapshot
+      - pendingTask
+      - inputRevision
+      properties:
+        snapshot:
+          allOf:
+          - $ref: '#/components/schemas/AnalysisSnapshot'
+          nullable: true
+        pendingTask:
+          allOf:
+          - $ref: '#/components/schemas/AnalysisTask'
+          nullable: true
+        inputRevision:
+          type: integer
+          minimum: 0
+    ReminderPlanRequest:
+      type: object
+      required:
+      - frequency
+      - timezone
+      - localTime
+      - startDate
+      - title
+      - medicationIds
+      properties:
+        reminderType: {type: string, enum: [MEDICATION, BP, BG, FOLLOW_UP]}
+        voicePrompt: {type: string, maxLength: 500}
+        frequency: &id012
+          type: string
+          enum:
+          - ONCE
+          - DAILY
+        timezone: &id013
+          type: string
+          enum:
+          - Asia/Shanghai
+        localTime: &id014
+          type: string
+          pattern: ^([01][0-9]|2[0-3]):[0-5][0-9]$
+        startDate: &id015
+          type: string
+          format: date
+        endDate: &id016
+          type: string
+          format: date
+          nullable: true
+        title: *id002
+        medicationIds: &id017
+          type: array
+          items: *id001
+        status: &id018
+          type: string
+          enum:
+          - ACTIVE
+          - PAUSED
+    ReminderPlan:
+      type: object
+      required:
+      - planId
+      - patientId
+      - version
+      - frequency
+      - timezone
+      - localTime
+      - startDate
+      - endDate
+      - title
+      - medicationIds
+      - status
+      properties:
+        reminderType: {type: string, enum: [MEDICATION, BP, BG, FOLLOW_UP]}
+        voicePrompt: {type: string, maxLength: 500}
+        planId: *id002
+        patientId: *id001
+        version: *id001
+        frequency: *id012
+        timezone: *id013
+        localTime: *id014
+        startDate: *id015
+        endDate: *id016
+        title: *id002
+        medicationIds: *id017
+        status: *id018
+    ReminderPlanPatch:
+      type: object
+      required:
+      - expectedVersion
+      properties:
+        reminderType: {type: string, enum: [MEDICATION, BP, BG, FOLLOW_UP]}
+        voicePrompt: {type: string, maxLength: 500}
+        frequency: *id012
+        timezone: *id013
+        localTime: *id014
+        startDate: *id015
+        endDate: *id016
+        title: *id002
+        medicationIds: *id017
+        status: *id018
+        expectedVersion: *id001
+    ConfirmedFacts:
+      type: object
+      required:
+      - medications
+      - symptoms
+      - explicitNoSymptoms
+      - glucose
+      - bloodPressure
+      - meals
+      properties:
+        medications:
+          type: array
+          items:
+            type: object
+            required:
+            - medicationId
+            - executionType
+            - occurredAt
+            properties:
+              medicationId: *id001
+              executionType:
+                type: string
+                enum:
+                - TAKEN
+                - MISSED
+                - MAKEUP
+                - UNKNOWN
+              occurredAt: *id011
+        symptoms:
+          type: array
+          items:
+            type: object
+            required:
+            - code
+            - severity
+            - occurredAt
+            properties:
+              code: *id002
+              severity:
+                type: integer
+              occurredAt: *id011
+        explicitNoSymptoms:
+          type: boolean
+          nullable: true
+        glucose:
+          type: array
+          items:
+            type: object
+            required:
+            - value
+            - unit
+            - occurredAt
+            properties:
+              value:
+                type: number
+              unit:
+                type: string
+                enum:
+                - mmol/L
+              occurredAt: *id011
+        bloodPressure:
+          type: array
+          items:
+            type: object
+            required:
+            - systolic
+            - diastolic
+            - unit
+            - occurredAt
+            properties:
+              systolic:
+                type: integer
+              diastolic:
+                type: integer
+              unit:
+                type: string
+                enum:
+                - mmHg
+              occurredAt: *id011
+        meals:
+          type: array
+          items:
+            type: object
+            required:
+            - mealType
+            - intakeLevel
+            - occurredAt
+            properties:
+              mealType: *id002
+              intakeLevel: *id002
+              occurredAt: *id011
+    ReminderPlanSaveResult:
+      type: object
+      required: [plan, occurrenceIds]
+      properties:
+        plan:
+          $ref: "#/components/schemas/ReminderPlan"
+        occurrenceIds:
+          type: array
+          items:
+            type: string
+    FeedbackRequest:
+      type: object
+      required:
+      - rawText
+      - source
+      - occurredAt
+      - occurrenceId
+      - followUpId
+      - confirmedFacts
+      properties:
+        captureTaskId: {type: string, description: Optional VOICE/DEVICE evidence task confirmed within TX1.}
+        captureVersion: {type: integer, minimum: 1, maximum: 2147483647}
+        expectedFollowUpVersion:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+          description: Required when creating a reply linked to followUpId.
+        expectedVersion:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+          description: Required when occurrenceId is provided.
+        textFactsReviewed:
+          type: boolean
+          description: Required true when nonblank raw text and confirmed fields coexist; raw text is always retained.
+        rawText: *id002
+        source: &id019
+          type: string
+          enum:
+          - MANUAL
+          - REMINDER
+        occurredAt: *id011
+        occurrenceId: &id020
+          type: string
+          nullable: true
+        followUpId: &id021
+          type: string
+          nullable: true
+        confirmedFacts: &id022
+          $ref: '#/components/schemas/ConfirmedFacts'
+    FeedbackRevisionRequest:
+      type: object
+      required:
+      - rawText
+      - source
+      - occurredAt
+      - occurrenceId
+      - followUpId
+      - confirmedFacts
+      - expectedVersion
+      - changeReason
+      properties:
+        textFactsReviewed:
+          type: boolean
+          description: Required true when nonblank raw text and confirmed fields coexist; raw text is always retained.
+        rawText: *id002
+        source: *id019
+        occurredAt: *id011
+        occurrenceId: *id020
+        followUpId: *id021
+        confirmedFacts: *id022
+        expectedVersion: *id001
+        changeReason:
+          type: string
+          minLength: 1
+    FeedbackRevision:
+      type: object
+      required: [revisionId, version, rawText, confirmedFacts, source, occurredAt, recordedAt, actorId, changeReason]
+      properties:
+        revisionId: {type: string}
+        version: {type: integer}
+        rawText: {type: string}
+        confirmedFacts:
+          $ref: "#/components/schemas/ConfirmedFacts"
+        source: {type: string}
+        occurredAt: {type: string, format: date-time}
+        recordedAt: {type: string, format: date-time}
+        actorId: {type: integer}
+        changeReason: {type: string}
+    FeedbackRecord:
+      type: object
+      required:
+      - recordId
+      - revisionId
+      - version
+      - patientId
+      - rawText
+      - confirmedFacts
+      - analysisTask
+      properties:
+        captureTaskId: {type: string}
+        captureSource: {type: string, enum: [VOICE, DEVICE], description: Server-owned acquisition origin; source remains the existing workflow source.}
+        inputRevision: {type: integer, minimum: 0}
+        source: {type: string}
+        occurredAt: {type: string, format: date-time}
+        recordedAt: {type: string, format: date-time}
+        occurrenceId: {type: string, nullable: true}
+        reminder:
+          allOf:
+          - $ref: '#/components/schemas/ReminderItem'
+          nullable: true
+        revisions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedbackRevision'
+        recordId: *id002
+        revisionId: *id002
+        version: *id001
+        patientId: *id001
+        rawText: *id002
+        confirmedFacts:
+          $ref: '#/components/schemas/ConfirmedFacts'
+        analysisTask:
+          $ref: '#/components/schemas/AnalysisTask'
+    SkipRequest:
+      type: object
+      required:
+      - expectedVersion
+      - reason
+      properties:
+        expectedVersion: *id001
+        reason:
+          type: string
+          minLength: 1
+    Review:
+      type: object
+      required:
+      - reviewId
+      - analysisRunId
+      - snapshotId
+      - status
+      - comment
+      - reason
+      - historical
+      properties:
+        reviewId:
+          type: string
+        analysisRunId:
+          type: string
+        snapshotId:
+          type: string
+        status:
+          type: string
+        comment:
+          type: string
+        reason:
+          type: string
+        historical:
+          type: boolean
+    ReviewRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - analysisRunId
+      - snapshotId
+      - expectedSnapshotId
+      - status
+      - comment
+      - reason
+      properties:
+        analysisRunId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        snapshotId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        expectedSnapshotId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        allowHistorical:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - REVIEWED
+          - NEEDS_MORE_DATA
+          - DISAGREED
+        comment:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+    FollowUpRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - sourceReviewId
+      - analysisRunId
+      - snapshotId
+      - requiredFields
+      - dueAt
+      - instruction
+      properties:
+        sourceReviewId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        analysisRunId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        snapshotId:
+          type: string
+          minLength: 1
+          maxLength: 64
+        requiredFields:
+          type: array
+          minItems: 1
+          maxItems: 4
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+            - BLOOD_GLUCOSE
+            - BLOOD_PRESSURE
+            - SYMPTOM
+            - ADHERENCE
+        dueAt:
+          type: string
+          format: date-time
+        instruction:
+          type: string
+          minLength: 1
+          maxLength: 1000
+    FollowUpPatch:
+      type: object
+      additionalProperties: false
+      required:
+      - expectedVersion
+      properties:
+        expectedVersion:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        status:
+          type: string
+          enum:
+          - PENDING
+          - CANCELLED
+        dueAt:
+          type: string
+          format: date-time
+        instruction:
+          type: string
+          minLength: 1
+          maxLength: 1000
+    FollowUp:
+      type: object
+      required:
+      - followUpId
+      - sourceReviewId
+      - analysisRunId
+      - snapshotId
+      - version
+      - status
+      - requiredFields
+      - dueAt
+      - instruction
+      - reminder
+      - completedRecordId
+      properties:
+        followUpId:
+          type: string
+        sourceReviewId:
+          type: string
+        analysisRunId:
+          type: string
+        snapshotId:
+          type: string
+        occurrenceId:
+          type: string
+        dueAt:
+          type: string
+        instruction:
+          type: string
+        version:
+          type: integer
+          minimum: 1
+        status:
+          type: string
+          enum:
+          - PENDING
+          - COMPLETED
+          - CANCELLED
+        requiredFields:
+          type: array
+          items:
+            type: string
+        reminder:
+          $ref: '#/components/schemas/ReminderItem'
+        completedRecordId:
+          type: string
+          nullable: true
+    DailyEvent:
+      type: object
+      required:
+      - eventId
+      - recordId
+      - revisionId
+      - type
+      - occurredAt
+      - evidence
+      properties:
+        eventId: *id002
+        recordId: *id002
+        revisionId: *id002
+        type: *id002
+        occurredAt: *id011
+        evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvidenceReference'
+    AnalysisJointEvent:
+      type: object
+      required:
+      - eventId
+      - eventType
+      - evidence
+      properties:
+        eventId:
+          type: string
+        eventType:
+          type: string
+        evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvidenceReference'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+security:
+- bearerAuth: []

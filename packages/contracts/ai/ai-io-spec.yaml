@@ -1,0 +1,260 @@
+openapi: 3.0.3
+info:
+  title: 药衡智护 AI I/O Spec v1
+  version: 1.0.0
+  description: AI 服务固定输入输出契约，禁止自由变形。
+servers:
+  - url: /
+paths:
+  /ai/parse-event:
+    post:
+      summary: 自然语言 / 追问回答结构化
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParseEventRequest'
+      responses:
+        '200':
+          description: 结构化结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParseEventResponse'
+  /ai/detect-joint-events:
+    post:
+      summary: 基于事件流识别联合事件
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DetectJointEventsRequest'
+      responses:
+        '200':
+          description: 联合事件结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetectJointEventsResponse'
+  /ai/score-risk:
+    post:
+      summary: 输出五类风险评分
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScoreRiskRequest'
+      responses:
+        '200':
+          description: 风险评分
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreRiskResponse'
+  /ai/generate-report:
+    post:
+      summary: 输出家属版 / 医生版报告
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateReportRequest'
+      responses:
+        '200':
+          description: 双视图报告
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateReportResponse'
+components:
+  schemas:
+    ParseEventRequest:
+      type: object
+      required: [patientId, triggerType, rawText, context]
+      properties:
+        patientId:
+          type: integer
+        triggerType:
+          type: string
+        rawText:
+          type: string
+        context:
+          type: object
+          properties:
+            currentMedications:
+              type: array
+              items:
+                type: string
+            latestBp:
+              type: object
+              nullable: true
+            latestBg:
+              type: number
+              nullable: true
+    ParseEventResponse:
+      type: object
+      required: [structuredEvent, confidence, modelVersion]
+      properties:
+        structuredEvent:
+          type: object
+          properties:
+            symptoms:
+              type: array
+              items:
+                type: string
+            meal:
+              type: object
+              properties:
+                taken:
+                  type: boolean
+                amount:
+                  type: string
+            adherence:
+              type: object
+              properties:
+                makeupMed:
+                  type: boolean
+                missedMed:
+                  type: boolean
+            timeHint:
+              type: string
+        confidence:
+          type: number
+        modelVersion:
+          type: string
+    DetectJointEventsRequest:
+      type: object
+      required: [patientId, timeWindow, events, medications, profile]
+      properties:
+        patientId:
+          type: integer
+        timeWindow:
+          type: object
+          required: [start, end]
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+        events:
+          type: array
+          items:
+            type: object
+        medications:
+          type: array
+          items:
+            type: object
+        profile:
+          type: object
+    JointEvent:
+      type: object
+      required: [eventType, severity, evidence, riskDirections]
+      properties:
+        eventType:
+          type: string
+          enum: [JE001, JE002, JE003, JE004, JE005, JE006, JE007, JE008, JE009, JE010]
+        severity:
+          type: integer
+        evidence:
+          type: object
+        riskDirections:
+          type: array
+          items:
+            type: string
+            enum: [DEINTENSIFICATION, INTERACTION, TEMPORAL_BEHAVIOR, JOINT_EVENT]
+    DetectJointEventsResponse:
+      type: object
+      required: [jointEvents, modelVersion]
+      properties:
+        jointEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/JointEvent'
+        modelVersion:
+          type: string
+    ScoreRiskRequest:
+      type: object
+      required: [patientId, jointEvents, profile]
+      properties:
+        patientId:
+          type: integer
+        jointEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/JointEvent'
+        profile:
+          type: object
+    ScoreRiskResponse:
+      type: object
+      required:
+        - deintensificationScore
+        - interactionScore
+        - behaviorScore
+        - jointEventScore
+        - reviewPriority
+        - reasons
+        - modelVersion
+      properties:
+        deintensificationScore:
+          type: integer
+        interactionScore:
+          type: integer
+        behaviorScore:
+          type: integer
+        jointEventScore:
+          type: integer
+        reviewPriority:
+          type: string
+          enum: [OBSERVE, RETEST_SOON, CLINIC_REVIEW, HIGH_PRIORITY]
+        reasons:
+          type: array
+          items:
+            type: string
+        modelVersion:
+          type: string
+    GenerateReportRequest:
+      type: object
+      required: [patientId, risk, jointEvents]
+      properties:
+        patientId:
+          type: integer
+        risk:
+          $ref: '#/components/schemas/ScoreRiskResponse'
+        jointEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/JointEvent'
+    GenerateReportResponse:
+      type: object
+      required: [familyVersion, doctorVersion, modelVersion]
+      properties:
+        familyVersion:
+          type: object
+          properties:
+            title:
+              type: string
+            actions:
+              type: array
+              items:
+                type: string
+        doctorVersion:
+          type: object
+          properties:
+            title:
+              type: string
+            summary:
+              type: array
+              items:
+                type: string
+            evidence:
+              type: array
+              items:
+                type: string
+        modelVersion:
+          type: string

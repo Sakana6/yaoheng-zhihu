@@ -1,0 +1,9 @@
+{
+  "version": "local-synthetic-catalog-1",
+  "purpose": "Local demonstration name retrieval; no clinical classification or dosing recommendation",
+  "entries": [
+    {"code":"LOCAL_METFORMIN","genericName":"二甲双胍","brandName":"格华止","strength":"0.5g","aliases":["二甲双胍","盐酸二甲双胍片","格华止","metformin"]},
+    {"code":"LOCAL_VALSARTAN","genericName":"缬沙坦","brandName":"代文","strength":"80mg","aliases":["缬沙坦","缬沙坦胶囊","代文","valsartan"]},
+    {"code":"LOCAL_GLIBENCLAMIDE","genericName":"格列本脲","brandName":"","strength":"2.5mg","aliases":["格列本脲","优降糖","glibenclamide"]}
+  ]
+}

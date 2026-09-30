@@ -1,0 +1,140 @@
+openapi: 3.0.3
+info:
+  title: R2 local capture API
+  version: 1.0.0
+  description: Bearer authentication and patient ownership on every route; caregivers write, doctors read. POST requires Idempotency-Key. Only existing R1 medication/feedback saves can confirm candidates. DEVICE confirmation is restricted to standalone MANUAL measurement records without occurrenceId or followUpId; violations return 422 DEVICE_STANDALONE_MEASUREMENT_REQUIRED. DEVICE-linked feedback revisions retain the measurement-only boundary (422 DEVICE_MEASUREMENTS_ONLY); manual measurement corrections preserve original evidence and provenance.
+servers: [{url: /api}]
+security: [{BearerAuth: []}]
+paths:
+  /patients/{patientId}/capture-tasks:
+    parameters: [{$ref: '#/components/parameters/Patient'}]
+    post:
+      summary: PNG/JPEG upload, max 5 MiB and 16 million pixels; validate MIME, extension, signature and decode
+      parameters:
+        - {$ref: '#/components/parameters/Key'}
+        - {name: X-File-Name, in: header, required: true, schema: {type: string}, description: URI-encoded basename}
+      requestBody:
+        required: true
+        content:
+          image/png: {schema: {type: string, format: binary}}
+          image/jpeg: {schema: {type: string, format: binary}}
+      responses: {'200': {$ref: '#/components/responses/Task'}, '413': {description: Oversize}, '415': {description: Type/signature mismatch}}
+    get:
+      summary: Patient capture evidence list
+      responses: {'200': {description: Standard envelope containing items}}
+  /patients/{patientId}/capture-tasks/text:
+    parameters: [{$ref: '#/components/parameters/Patient'}]
+    post:
+      summary: Local name candidates, never infer dosage
+      parameters: [{$ref: '#/components/parameters/Key'}]
+      requestBody:
+        required: true
+        content:
+          application/json: {schema: {type: object, required: [rawText], properties: {rawText: {type: string, minLength: 1, maxLength: 2000}}}}
+      responses: {'200': {$ref: '#/components/responses/Task'}}
+  /patients/{patientId}/capture-tasks/voice:
+    parameters: [{$ref: '#/components/parameters/Patient'}]
+    post:
+      summary: Audio transcription, max 2 MiB; original audio never retained
+      parameters: [{$ref: '#/components/parameters/Key'}]
+      requestBody:
+        required: true
+        content:
+          audio/wav: {schema: {type: string, format: binary}}
+          audio/webm: {schema: {type: string, format: binary}}
+          audio/ogg: {schema: {type: string, format: binary}}
+      responses: {'200': {$ref: '#/components/responses/Task'}, '413': {description: Oversize}, '415': {description: Invalid signature}}
+  /patients/{patientId}/capture-tasks/{taskId}:
+    parameters: [{$ref: '#/components/parameters/Patient'}, {$ref: '#/components/parameters/Task'}]
+    get:
+      summary: Original evidence, candidates, version and confirmation
+      responses: {'200': {$ref: '#/components/responses/Task'}, '404': {description: Task not owned by patient}}
+  /patients/{patientId}/capture-tasks/{taskId}/content:
+    parameters: [{$ref: '#/components/parameters/Patient'}, {$ref: '#/components/parameters/Task'}]
+    get:
+      summary: Authorized no-store original image download; no raw voice audio
+      responses: {'200': {description: Binary with validated MIME and nosniff}, '410': {description: Deleted or unavailable}}
+  /patients/{patientId}/capture-tasks/{taskId}/{action}:
+    parameters:
+      - {$ref: '#/components/parameters/Patient'}
+      - {$ref: '#/components/parameters/Task'}
+      - {name: action, in: path, required: true, schema: {type: string, enum: [process, cancel, reject, purge]}}
+    post:
+      summary: Versioned task action; process only IMAGE/TEXT, voice retries require reupload
+      parameters: [{$ref: '#/components/parameters/Key'}]
+      requestBody:
+        required: true
+        content:
+          application/json: {schema: {type: object, required: [expectedVersion], properties: {expectedVersion: {type: integer, minimum: 1, maximum: 2147483647}}}}
+      responses: {'200': {$ref: '#/components/responses/Task'}, '409': {description: Version/state conflict}}
+  /patients/{patientId}/capture-tasks/devices/{deviceId}:
+    parameters:
+      - {$ref: '#/components/parameters/Patient'}
+      - {name: deviceId, in: path, required: true, schema: {type: string, pattern: '^[A-Za-z0-9_-]{1,64}$'}}
+    get:
+      summary: Software adapter state
+      responses: {'200': {description: Envelope with deviceId/state/version/sourceVersion}}
+    post:
+      summary: Connect/disconnect; CONNECTING transition audited, final CONNECTED/ERROR/DISCONNECTED returned
+      parameters: [{$ref: '#/components/parameters/Key'}]
+      requestBody:
+        required: true
+        content:
+          application/json: {schema: {type: object, required: [operation, expectedVersion], properties: {operation: {type: string, enum: [connect, disconnect]}, expectedVersion: {type: integer, minimum: 0}, sourceVersion: {type: string, enum: [replay-v1]}}}}
+      responses: {'200': {description: Versioned device session}, '409': {description: Stale session version}}
+  /patients/{patientId}/capture-tasks/device-events:
+    parameters: [{$ref: '#/components/parameters/Patient'}]
+    post:
+      summary: Deduplicate raw event; invalid time/unit/metric becomes REJECTED evidence
+      parameters: [{$ref: '#/components/parameters/Key'}]
+      requestBody:
+        required: true
+        content:
+          application/json: {schema: {$ref: '#/components/schemas/DeviceEvent'}}
+      responses: {'200': {$ref: '#/components/responses/Task'}, '409': {description: Disconnected or event ID reused with different content}}
+components:
+  securitySchemes:
+    BearerAuth: {type: http, scheme: bearer}
+  parameters:
+    Patient: {name: patientId, in: path, required: true, schema: {type: integer, minimum: 1}}
+    Task: {name: taskId, in: path, required: true, schema: {type: string, pattern: '^cap_[a-f0-9-]{36}$'}}
+    Key: {name: Idempotency-Key, in: header, required: true, schema: {type: string, pattern: '^[A-Za-z0-9_-]{8,128}$'}}
+  responses:
+    Task:
+      description: CaptureTask in code/message/data envelope. FAILED/REJECTED are domain outcomes, never confirmed facts.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code: {type: integer}
+              message: {type: string}
+              data: {$ref: '#/components/schemas/CaptureTask'}
+  schemas:
+    CaptureTask:
+      type: object
+      required: [taskId, patientId, kind, version, status, sha256, result, confirmation]
+      properties:
+        taskId: {type: string}
+        patientId: {type: integer}
+        kind: {type: string, enum: [IMAGE, TEXT, VOICE, DEVICE]}
+        version: {type: integer, minimum: 1}
+        status: {type: string, enum: [PENDING, RUNNING, CANDIDATE_READY, FAILED, CANCELLED, REJECTED, CONFIRMED]}
+        sha256: {type: string, pattern: '^[a-f0-9]{64}$'}
+        rawText: {type: string, nullable: true}
+        result: {type: object, nullable: true, description: Versioned OCR/name candidates or transcript/proposedFacts with original event}
+        confirmation: {type: object, nullable: true, description: Initial confirmation snapshot; later revisions remain in R1}
+        failureCode: {type: string, nullable: true}
+        fileDeleted: {type: boolean}
+        medicationId: {type: integer, nullable: true}
+    DeviceEvent:
+      type: object
+      required: [deviceId, eventId, observedAt, metric, value, unit, sourceVersion]
+      properties:
+        deviceId: {type: string, pattern: '^[A-Za-z0-9_-]{1,64}$'}
+        eventId: {type: string, pattern: '^[A-Za-z0-9_-]{1,64}$'}
+        observedAt: {type: string, format: date-time, description: Offset required; older than 30 days or over 5 minutes in future rejected}
+        metric: {type: string, enum: [GLUCOSE, BLOOD_PRESSURE]}
+        value: {oneOf: [{type: number}, {type: object, required: [systolic, diastolic], properties: {systolic: {type: integer}, diastolic: {type: integer}, heartRate: {type: integer}}}]}
+        unit: {type: string, enum: [mmol/L, mg/dL, mmHg]}
+        sourceVersion: {type: string, enum: [replay-v1]}

@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "checks": [
+    "startup: bundled runtimes only; both prebuilt pages and authorized logins",
+    "duplicate launcher refuses same data directory; first launch stays healthy",
+    "medication -> offline semantic candidate -> reviewed fact -> original analysis -> frozen context -> doctor read",
+    "family and doctor reports generated, downloaded and checksummed through production proxy",
+    "bundled local ASR decoded synthetic audio without installed Python or downloads",
+    "restart: migrations reused; confirmed record and doctor snapshot persisted",
+    "all owned ports closed after each shutdown"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "yaoheng-zhihu",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/mobile-app",
+    "apps/doctor-web"
+  ],
+  "scripts": {
+    "dev:mobile": "npm run dev -w apps/mobile-app",
+    "dev:doctor": "npm run dev -w apps/doctor-web",
+    "dev:backend": "powershell -ExecutionPolicy Bypass -File services/backend/run-dev.ps1",
+    "dev:backend:unix": "mvn -f services/backend/pom.xml compile exec:java",
+    "dev:demo": "powershell -ExecutionPolicy Bypass -File run-demo.ps1",
+    "build:mobile": "npm run build -w apps/mobile-app",
+    "build:doctor": "npm run build -w apps/doctor-web",
+    "build:backend": "powershell -ExecutionPolicy Bypass -File services/backend/build.ps1",
+    "test:source-entry": "node scripts/test-source-entry.mjs",
+    "test:backend-scripts": "node scripts/test-backend-scripts.mjs",
+    "test:contracts": "node scripts/test-contracts.mjs",
+    "test:analysis-ui": "node scripts/test-analysis-ui.mjs",
+    "test:session": "node scripts/test-session.mjs",
+    "test:notifications": "node scripts/test-notifications.mjs",
+    "test:r1-integration": "python scripts/test_r1_integration.py",
+    "test:analysis-integration": "python scripts/test_analysis_integration.py",
+    "dev:r1": "python scripts/r1_local.py run",
+    "test:r1-delivery": "python scripts/test_analysis_integration.py",
+    "db:local": "python scripts/local_database.py"
+  }
+}

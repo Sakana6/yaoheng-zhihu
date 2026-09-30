@@ -1,0 +1,23 @@
+{
+  "version": "synthetic-voice-replay-1",
+  "fixtures": [
+    {
+      "sha256": "0db679ed8bee905aa430dc8702d9d928902124017d9bbf57bd198fd7d2df6dee",
+      "text": "我今天没有吃药，请保留未知，核对后再记录。",
+      "requiresConfirmation": true,
+      "fixtureType": "synthetic tone; transcript scenario is explicitly assigned"
+    },
+    {
+      "sha256": "47e27e1114ade2cb2d4c71a6b550819a8c6a4444c26e9db5e207facf713d1312",
+      "text": "不是我，是家人以前发生过头晕。",
+      "requiresConfirmation": true,
+      "fixtureType": "synthetic tone; transcript scenario is explicitly assigned"
+    },
+    {
+      "sha256": "1d988f5f35c33f814ebf3230e643e7e9367fb9fc077ac3c3e54eb0af8a59ef0c",
+      "text": "合成回放：今天测量血糖为六。",
+      "requiresConfirmation": true,
+      "fixtureType": "synthetic tone; transcript scenario is explicitly assigned"
+    }
+  ]
+}
